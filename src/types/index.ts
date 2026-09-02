@@ -3,6 +3,13 @@
 // conform to these types — that's what makes swapping them a
 // one-file change instead of a rewrite.
 
+import { LucideIcon } from "lucide-react";
+
+export interface NavItem {
+  label: string;
+  icon: LucideIcon;
+}
+
 export type PeriodKey = "mei2026" | "apr2026" | "mar2026" | "q2026" | "y2026";
 
 export interface PeriodOption {
@@ -10,21 +17,45 @@ export interface PeriodOption {
   label: string;
 }
 
-export interface ChartSlice {
-  label: string;
-  value: number;
-  color: string; // hex, e.g. "#2f6fed"
+export interface MonthData {
+  bulan: string;
+  bulanPanjang: string;
+  tahun: number;
+  total: number;
 }
 
-export interface ProcessStep {
+export interface StatCardItem {
   label: string;
-  value: number;
-  pct: number | null; // null = terminal step (e.g. Sertifikat), no drop-off shown
+  value: string;
+  delta: string;
+  icon: LucideIcon;
+  ring: string;
+  card: string;
+  noArrow?: boolean;
 }
 
-export interface ProvinceCount {
-  province: string;
-  count: number;
+export interface DonutDatum {
+  name: string;
+  value: number;
+  pct: string;
+  color: string;
+}
+
+export interface ProcessStepBase {
+  no: number;
+  label: string;
+  value: number;
+  pct: string;
+  icon: LucideIcon;
+}
+
+export interface ProcessStepDisplay extends ProcessStepBase {
+  valueDisplay: string;
+}
+
+export interface ProvinsiDatum {
+  provinsi: string;
+  total: number;
 }
 
 export interface DashboardData {
@@ -43,9 +74,9 @@ export interface DashboardData {
   asesor: number;
   asesorNote: number;
 
-  jenis: ChartSlice[];
-  status: ChartSlice[];
-  biaya: ChartSlice[];
+  jenis: DonutDatum[];
+  status: DonutDatum[];
+  biaya: DonutDatum[];
 
   sla: number;
   slaOver: number;
@@ -53,16 +84,17 @@ export interface DashboardData {
   trend: number[]; // 12 months
   trendMonths: string[];
 
-  topProvinces: ProvinceCount[];
-  process: ProcessStep[];
+  topProvinces: ProvinsiDatum[];
+  process: ProcessStepDisplay[];
   workload: string;
 }
 
-export interface Notification {
-  id: string;
+export interface NotificationItem {
   title: string;
+  desc: string;
   time: string;
-  read: boolean;
+  icon: LucideIcon;
+  tone: string;
 }
 
 export type ModuleRow = Record<string, string | number>;
