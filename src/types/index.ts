@@ -58,34 +58,22 @@ export interface ProvinsiDatum {
   total: number;
 }
 
-export interface DashboardData {
-  period: PeriodKey;
+export interface MonthRecord {
+  periodKey: string;
   label: string;
   asOfDate: string;
+  totalSubmissions: number;
+  lpkCount: number;
+  accreditedCount: number;
+  activeAssessors: number;
+}
 
-  lpk: number;
-  lpkDelta: number;
-  akreditasi: number;
-  akreditasiDelta: number;
-  aktif: number;
-  aktifDelta: number;
-  sertifikat: number;
-  sertifikatDelta: number;
-  asesor: number;
-  asesorNote: number;
-
+export interface DashboardData extends MonthRecord {
   jenis: DonutDatum[];
   status: DonutDatum[];
   biaya: DonutDatum[];
-
-  sla: number;
-  slaOver: number;
-
-  trend: number[]; // 12 months
-  trendMonths: string[];
-
-  topProvinces: ProvinsiDatum[];
-  process: ProcessStepDisplay[];
+  topProvinces: { province: string; count: number }[];
+  process: { no: number; label: string; value: number; pct: string; icon?: LucideIcon }[];
   workload: string;
 }
 

@@ -42,7 +42,7 @@ import {
   ChevronRight,
   type LucideIcon,
 } from "lucide-react";
-import { MonthData, DonutDatum, NotificationItem, StatCardItem, ProcessStepDisplay, ProcessStepBase, ProvinsiDatum, NavItem } from "./types";
+import { MonthData, NotificationItem, StatCardItem, ProcessStepDisplay, ProcessStepBase, ProvinsiDatum, NavItem, ChartDatum } from "./types";
 
 
 /* ------------------------------- KONSTAN WAKTU ------------------------------- */
@@ -79,20 +79,20 @@ function formatID(n: number): string {
 
 /* ---------------------------------- DATA DASAR (100%) ---------------------------------- */
 
-const jenisLayananBase: DonutDatum[] = [
+const jenisLayananBase: ChartDatum[] = [
   { name: "Akreditasi Baru", value: 687, pct: "53,3%", color: "#3b82f6" },
   { name: "Reakreditasi", value: 412, pct: "32,0%", color: "#22c55e" },
   { name: "Penambahan Program", value: 188, pct: "14,7%", color: "#f59e0b" },
 ];
 
-const statusPengajuanBase: DonutDatum[] = [
+const statusPengajuanBase: ChartDatum[] = [
   { name: "Verifikasi", value: 312, pct: "24,3%", color: "#3b82f6" },
   { name: "Asesmen", value: 541, pct: "42,0%", color: "#22c55e" },
   { name: "Review", value: 213, pct: "16,5%", color: "#f59e0b" },
   { name: "Menunggu Keputusan", value: 221, pct: "17,2%", color: "#8b5cf6" },
 ];
 
-const pembiayaanBase: DonutDatum[] = [
+const pembiayaanBase: ChartDatum[] = [
   { name: "APBN", value: 784, pct: "60,9%", color: "#3b82f6" },
   { name: "APBD", value: 219, pct: "17,0%", color: "#22c55e" },
   { name: "Mandiri", value: 284, pct: "22,1%", color: "#f59e0b" },

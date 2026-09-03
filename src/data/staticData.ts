@@ -1,4 +1,5 @@
-import type { DashboardData, ModuleData, ModuleDefinition, ModuleRow, PeriodKey, PeriodOption } from "@/types";
+import type { DashboardData, ModuleData, ModuleDefinition, ModuleRow, MonthRecord, PeriodKey, PeriodOption } from "@/types";
+import { FileText, CheckSquare, Users, ClipboardList, Eye, Gavel, Award } from "lucide-react";
 
 // ---- Shared reference lists (ported from the original prototype) ----
 
@@ -40,193 +41,81 @@ const TREND_MONTHS = ["Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des", "Jan", "F
 
 // ---- Dashboard stats per period ----
 
-export const DASHBOARD_DATA: Record<PeriodKey, DashboardData> = {
-  mei2026: {
-    period: "mei2026", label: "Mei 2026", asOfDate: "19 Mei 2026 10:30 WIB",
-    lpk: 16382, lpkDelta: 3.2, akreditasi: 1504, akreditasiDelta: 4.5,
-    aktif: 1287, aktifDelta: 8.7, sertifikat: 732, sertifikatDelta: 12.1,
-    asesor: 346, asesorNote: 58,
+// Raw records (Simulates your future database rows)
+export const HISTORICAL_RECORDS: MonthRecord[] = [
+  {
+    periodKey: "mar2026",
+    label: "Maret 2026",
+    asOfDate: "31 Maret 2026 16:00 WIB",
+    totalSubmissions: 1102,
+    lpkCount: 15420,
+    accreditedCount: 1378,
+    activeAssessors: 331,
+  },
+  {
+    periodKey: "apr2026",
+    label: "April 2026",
+    asOfDate: "30 April 2026 17:00 WIB",
+    totalSubmissions: 1184,
+    lpkCount: 15870,
+    accreditedCount: 1439,
+    activeAssessors: 339,
+  },
+  {
+    periodKey: "mei2026",
+    label: "Mei 2026",
+    asOfDate: "19 Mei 2026 10:30 WIB",
+    totalSubmissions: 1287,
+    lpkCount: 16382,
+    accreditedCount: 1504,
+    activeAssessors: 346,
+  },
+];
+
+// Transformer function (Generates chart data from selected month)
+export function getDashboardData(periodKey: string): DashboardData {
+  const record = HISTORICAL_RECORDS.find((r) => r.periodKey === periodKey) 
+    || HISTORICAL_RECORDS[HISTORICAL_RECORDS.length - 1];
+
+  const BASELINE_TOTAL = 1287; // Mei benchmark total
+  const ratio = record.totalSubmissions / BASELINE_TOTAL;
+
+  return {
+    ...record,
     jenis: [
-      { label: "Akreditasi Baru", value: 687, color: COLORS.blue },
-      { label: "Reakreditasi", value: 412, color: COLORS.green },
-      { label: "Penambahan Program", value: 188, color: COLORS.orange },
+      { name: "Akreditasi Baru", value: Math.round(687 * ratio), pct: "53,3%", color: "#3b82f6" },
+      { name: "Reakreditasi", value: Math.round(412 * ratio), pct: "32,0%", color: "#22c55e" },
+      { name: "Penambahan Program", value: Math.round(188 * ratio), pct: "14,7%", color: "#f59e0b" },
     ],
     status: [
-      { label: "Verifikasi", value: 312, color: COLORS.blue },
-      { label: "Asesmen", value: 541, color: COLORS.green },
-      { label: "Review", value: 213, color: COLORS.orange },
-      { label: "Menunggu Keputusan", value: 221, color: COLORS.purple },
+      { name: "Verifikasi", value: Math.round(312 * ratio), pct: "24,3%", color: "#3b82f6" },
+      { name: "Asesmen", value: Math.round(541 * ratio), pct: "42,0%", color: "#22c55e" },
+      { name: "Review", value: Math.round(213 * ratio), pct: "16,5%", color: "#f59e0b" },
+      { name: "Menunggu Keputusan", value: Math.round(221 * ratio), pct: "17,2%", color: "#8b5cf6" },
     ],
     biaya: [
-      { label: "APBN", value: 784, color: COLORS.blue },
-      { label: "APBD", value: 219, color: COLORS.green },
-      { label: "Mandiri", value: 284, color: COLORS.orange },
+      { name: "APBN", value: Math.round(784 * ratio), pct: "60,9%", color: "#3b82f6" },
+      { name: "APBD", value: Math.round(219 * ratio), pct: "17,0%", color: "#22c55e" },
+      { name: "Mandiri", value: Math.round(284 * ratio), pct: "22,1%", color: "#f59e0b" },
     ],
-    sla: 92, slaOver: 102,
-    trend: [320, 410, 560, 780, 700, 980, 940, 950, 880, 1010, 1150, 1287],
-    trendMonths: TREND_MONTHS,
     topProvinces: [
-      { province: "Jawa Barat", count: 214 }, { province: "Jawa Timur", count: 187 },
-      { province: "Jawa Tengah", count: 152 }, { province: "Sumatera Utara", count: 98 },
-      { province: "Sulawesi Selatan", count: 76 },
+      { province: "Jawa Barat", count: Math.round(214 * ratio) },
+      { province: "Jawa Timur", count: Math.round(187 * ratio) },
+      { province: "Jawa Tengah", count: Math.round(152 * ratio) },
+      { province: "Sumatera Utara", count: Math.round(98 * ratio) },
+      { province: "Sulawesi Selatan", count: Math.round(76 * ratio) },
     ],
     process: [
-      { label: "Pengajuan", value: 1287, pct: 100 }, { label: "Verifikasi", value: 975, pct: 75.7 },
-      { label: "Penugasan", value: 821, pct: 63.8 }, { label: "Asesmen", value: 541, pct: 42.0 },
-      { label: "Review", value: 213, pct: 16.5 }, { label: "Keputusan", value: 187, pct: 14.5 },
-      { label: "Sertifikat", value: 732, pct: null },
+      { no: 1, label: "Pengajuan", value: record.totalSubmissions, pct: "100%" },
+      { no: 2, label: "Verifikasi", value: Math.round(975 * ratio), pct: "75,7%" },
+      { no: 3, label: "Penugasan", value: Math.round(821 * ratio), pct: "63,8%" },
+      { no: 4, label: "Asesmen", value: Math.round(541 * ratio), pct: "42,0%" },
+      { no: 5, label: "Review", value: Math.round(213 * ratio), pct: "16,5%" },
+      { no: 6, label: "Keputusan", value: Math.round(187 * ratio), pct: "14,5%" },
     ],
-    workload: "8,5",
-  },
-  apr2026: {
-    period: "apr2026", label: "April 2026", asOfDate: "30 April 2026 17:00 WIB",
-    lpk: 15870, lpkDelta: 2.6, akreditasi: 1439, akreditasiDelta: 3.9,
-    aktif: 1184, aktifDelta: 5.1, sertifikat: 653, sertifikatDelta: 9.8,
-    asesor: 339, asesorNote: 55,
-    jenis: [
-      { label: "Akreditasi Baru", value: 612, color: COLORS.blue },
-      { label: "Reakreditasi", value: 389, color: COLORS.green },
-      { label: "Penambahan Program", value: 183, color: COLORS.orange },
-    ],
-    status: [
-      { label: "Verifikasi", value: 287, color: COLORS.blue },
-      { label: "Asesmen", value: 498, color: COLORS.green },
-      { label: "Review", value: 196, color: COLORS.orange },
-      { label: "Menunggu Keputusan", value: 203, color: COLORS.purple },
-    ],
-    biaya: [
-      { label: "APBN", value: 711, color: COLORS.blue },
-      { label: "APBD", value: 201, color: COLORS.green },
-      { label: "Mandiri", value: 272, color: COLORS.orange },
-    ],
-    sla: 90, slaOver: 118,
-    trend: [290, 375, 510, 720, 655, 905, 880, 900, 860, 955, 1050, 1184],
-    trendMonths: TREND_MONTHS,
-    topProvinces: [
-      { province: "Jawa Barat", count: 198 }, { province: "Jawa Timur", count: 171 },
-      { province: "Jawa Tengah", count: 140 }, { province: "Sumatera Utara", count: 90 },
-      { province: "Sulawesi Selatan", count: 69 },
-    ],
-    process: [
-      { label: "Pengajuan", value: 1184, pct: 100 }, { label: "Verifikasi", value: 882, pct: 74.5 },
-      { label: "Penugasan", value: 751, pct: 63.4 }, { label: "Asesmen", value: 498, pct: 42.1 },
-      { label: "Review", value: 196, pct: 16.6 }, { label: "Keputusan", value: 173, pct: 14.6 },
-      { label: "Sertifikat", value: 653, pct: null },
-    ],
-    workload: "8,1",
-  },
-  mar2026: {
-    period: "mar2026", label: "Maret 2026", asOfDate: "31 Maret 2026 16:00 WIB",
-    lpk: 15420, lpkDelta: 1.9, akreditasi: 1378, akreditasiDelta: 3.1,
-    aktif: 1102, aktifDelta: 4.0, sertifikat: 588, sertifikatDelta: 7.4,
-    asesor: 331, asesorNote: 52,
-    jenis: [
-      { label: "Akreditasi Baru", value: 565, color: COLORS.blue },
-      { label: "Reakreditasi", value: 362, color: COLORS.green },
-      { label: "Penambahan Program", value: 175, color: COLORS.orange },
-    ],
-    status: [
-      { label: "Verifikasi", value: 264, color: COLORS.blue },
-      { label: "Asesmen", value: 462, color: COLORS.green },
-      { label: "Review", value: 178, color: COLORS.orange },
-      { label: "Menunggu Keputusan", value: 198, color: COLORS.purple },
-    ],
-    biaya: [
-      { label: "APBN", value: 662, color: COLORS.blue },
-      { label: "APBD", value: 188, color: COLORS.green },
-      { label: "Mandiri", value: 252, color: COLORS.orange },
-    ],
-    sla: 88, slaOver: 132,
-    trend: [260, 340, 470, 660, 600, 845, 810, 835, 795, 880, 965, 1102],
-    trendMonths: TREND_MONTHS,
-    topProvinces: [
-      { province: "Jawa Barat", count: 180 }, { province: "Jawa Timur", count: 158 },
-      { province: "Jawa Tengah", count: 129 }, { province: "Sumatera Utara", count: 83 },
-      { province: "Sulawesi Selatan", count: 63 },
-    ],
-    process: [
-      { label: "Pengajuan", value: 1102, pct: 100 }, { label: "Verifikasi", value: 806, pct: 73.1 },
-      { label: "Penugasan", value: 679, pct: 61.6 }, { label: "Asesmen", value: 462, pct: 41.9 },
-      { label: "Review", value: 178, pct: 16.2 }, { label: "Keputusan", value: 160, pct: 14.5 },
-      { label: "Sertifikat", value: 588, pct: null },
-    ],
-    workload: "7,6",
-  },
-  q2026: {
-    period: "q2026", label: "Kuartal I 2026", asOfDate: "31 Maret 2026 · Kumulatif Kuartal I",
-    lpk: 16382, lpkDelta: 6.4, akreditasi: 1504, akreditasiDelta: 9.7,
-    aktif: 3573, aktifDelta: 14.2, sertifikat: 1973, sertifikatDelta: 21.6,
-    asesor: 346, asesorNote: 58,
-    jenis: [
-      { label: "Akreditasi Baru", value: 1864, color: COLORS.blue },
-      { label: "Reakreditasi", value: 1163, color: COLORS.green },
-      { label: "Penambahan Program", value: 546, color: COLORS.orange },
-    ],
-    status: [
-      { label: "Verifikasi", value: 863, color: COLORS.blue },
-      { label: "Asesmen", value: 1501, color: COLORS.green },
-      { label: "Review", value: 587, color: COLORS.orange },
-      { label: "Menunggu Keputusan", value: 622, color: COLORS.purple },
-    ],
-    biaya: [
-      { label: "APBN", value: 2157, color: COLORS.blue },
-      { label: "APBD", value: 608, color: COLORS.green },
-      { label: "Mandiri", value: 808, color: COLORS.orange },
-    ],
-    sla: 90, slaOver: 352,
-    trend: [260, 340, 470, 660, 600, 845, 810, 835, 795, 880, 965, 3573],
-    trendMonths: TREND_MONTHS,
-    topProvinces: [
-      { province: "Jawa Barat", count: 592 }, { province: "Jawa Timur", count: 516 },
-      { province: "Jawa Tengah", count: 421 }, { province: "Sumatera Utara", count: 271 },
-      { province: "Sulawesi Selatan", count: 208 },
-    ],
-    process: [
-      { label: "Pengajuan", value: 3573, pct: 100 }, { label: "Verifikasi", value: 2663, pct: 74.5 },
-      { label: "Penugasan", value: 2251, pct: 63.0 }, { label: "Asesmen", value: 1501, pct: 42.0 },
-      { label: "Review", value: 587, pct: 16.4 }, { label: "Keputusan", value: 520, pct: 14.6 },
-      { label: "Sertifikat", value: 1973, pct: null },
-    ],
-    workload: "8,0",
-  },
-  y2026: {
-    period: "y2026", label: "Tahun 2026 (s.d. Mei)", asOfDate: "19 Mei 2026 · Kumulatif Tahun Berjalan",
-    lpk: 16382, lpkDelta: 9.8, akreditasi: 1504, akreditasiDelta: 15.3,
-    aktif: 5860, aktifDelta: 22.5, sertifikat: 3218, sertifikatDelta: 31.2,
-    asesor: 346, asesorNote: 58,
-    jenis: [
-      { label: "Akreditasi Baru", value: 3055, color: COLORS.blue },
-      { label: "Reakreditasi", value: 1908, color: COLORS.green },
-      { label: "Penambahan Program", value: 897, color: COLORS.orange },
-    ],
-    status: [
-      { label: "Verifikasi", value: 1415, color: COLORS.blue },
-      { label: "Asesmen", value: 2461, color: COLORS.green },
-      { label: "Review", value: 963, color: COLORS.orange },
-      { label: "Menunggu Keputusan", value: 1021, color: COLORS.purple },
-    ],
-    biaya: [
-      { label: "APBN", value: 3540, color: COLORS.blue },
-      { label: "APBD", value: 997, color: COLORS.green },
-      { label: "Mandiri", value: 1323, color: COLORS.orange },
-    ],
-    sla: 91, slaOver: 527,
-    trend: [320, 410, 560, 780, 700, 980, 940, 950, 880, 1010, 1150, 5860],
-    trendMonths: TREND_MONTHS,
-    topProvinces: [
-      { province: "Jawa Barat", count: 972 }, { province: "Jawa Timur", count: 846 },
-      { province: "Jawa Tengah", count: 690 }, { province: "Sumatera Utara", count: 445 },
-      { province: "Sulawesi Selatan", count: 342 },
-    ],
-    process: [
-      { label: "Pengajuan", value: 5860, pct: 100 }, { label: "Verifikasi", value: 4370, pct: 74.6 },
-      { label: "Penugasan", value: 3692, pct: 63.0 }, { label: "Asesmen", value: 2461, pct: 42.0 },
-      { label: "Review", value: 963, pct: 16.4 }, { label: "Keputusan", value: 852, pct: 14.5 },
-      { label: "Sertifikat", value: 3218, pct: null },
-    ],
-    workload: "8,3",
-  },
-};
+    workload: (8.5 * ratio).toFixed(1).replace(".", ","),
+  };
+}
 
 // ---- Module (table) definitions + seeded rows ----
 
